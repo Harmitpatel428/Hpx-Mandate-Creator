@@ -126,6 +126,11 @@ function collectRuns(node: TiptapNode): TextRun[] {
       runs.push(marksToRun(n.text, n.marks))
       return
     }
+    // A variable-placeholder chip resolves via the same {{key}} path as text.
+    if (n.type === 'variablePlaceholder' && typeof n.attrs?.key === 'string') {
+      runs.push({ text: `{{${n.attrs.key}}}` })
+      return
+    }
     if (n.type === 'hardBreak') {
       runs.push({ text: '\n' })
       return

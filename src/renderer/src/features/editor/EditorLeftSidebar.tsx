@@ -2,6 +2,7 @@ import * as React from 'react'
 import {
   FileText,
   Variable,
+  FormInput,
   GitBranch,
   CheckSquare,
   Library,
@@ -18,6 +19,7 @@ import { useUiStore } from '@/stores/uiStore'
 import type { DocumentStatus } from 'shared/document-model/types'
 import { useProjectStore } from '@/stores/projectStore'
 import { VariablesPanel } from './variables/VariablesPanel'
+import { DataEntryPanel } from './data-entry/DataEntryPanel'
 import { LogicPanel } from './logic/LogicPanel'
 import { ValidationPanel } from './validation/ValidationPanel'
 import { ClausePanel } from './clauses/ClausePanel'
@@ -26,11 +28,12 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type D
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-type Panel = 'properties' | 'variables' | 'logic' | 'validation' | 'clauses' | 'versions' | 'settings'
+type Panel = 'properties' | 'variables' | 'data' | 'logic' | 'validation' | 'clauses' | 'versions' | 'settings'
 
 const NAV_ITEMS: { id: Panel; icon: React.ElementType; label: string }[] = [
   { id: 'properties', icon: FileText, label: 'Document' },
   { id: 'variables', icon: Variable, label: 'Variables' },
+  { id: 'data', icon: FormInput, label: 'Data Entry' },
   { id: 'logic', icon: GitBranch, label: 'Logic' },
   { id: 'validation', icon: CheckSquare, label: 'Validation' },
   { id: 'clauses', icon: Library, label: 'Clauses' },
@@ -191,6 +194,9 @@ export function EditorLeftSidebar() {
           {/* Variables panel */}
           {activePanel === 'variables' && <VariablesPanel />}
 
+          {/* Data entry panel */}
+          {activePanel === 'data' && <DataEntryPanel />}
+
           {/* Logic panel */}
           {activePanel === 'logic' && <LogicPanel />}
 
@@ -206,6 +212,7 @@ export function EditorLeftSidebar() {
           {/* Future panels */}
           {activePanel !== 'properties' &&
             activePanel !== 'variables' &&
+            activePanel !== 'data' &&
             activePanel !== 'logic' &&
             activePanel !== 'validation' &&
             activePanel !== 'clauses' &&

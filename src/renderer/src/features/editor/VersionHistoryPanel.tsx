@@ -80,7 +80,7 @@ export function VersionHistoryPanel() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Versions ({versions.length})
+          Snapshots ({versions.length})
         </p>
         <Button
           variant="ghost"
@@ -99,12 +99,26 @@ export function VersionHistoryPanel() {
         </Button>
       </div>
 
+      {/* Current working state (autosaved in place, not a snapshot) */}
+      <div className="rounded border border-primary/40 bg-primary/5 p-2 text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+          <span className="font-medium text-foreground/90">Current state</span>
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-0.5">
+          Autosaved · edited {formatDateTime(currentProject?.updatedAt)}
+        </p>
+        <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+          Use the save icon above (or Ctrl/Cmd+S) to capture a snapshot.
+        </p>
+      </div>
+
       {loading && versions.length === 0 ? (
         <p className="text-xs text-muted-foreground/60">Loading…</p>
       ) : versions.length === 0 ? (
-        <div className="flex flex-col items-center gap-1.5 pt-6 text-center">
+        <div className="flex flex-col items-center gap-1.5 pt-4 text-center">
           <History className="h-5 w-5 text-muted-foreground/40" />
-          <p className="text-xs text-muted-foreground/60">No versions saved yet</p>
+          <p className="text-xs text-muted-foreground/60">No snapshots yet</p>
         </div>
       ) : (
         <div className="space-y-1.5">

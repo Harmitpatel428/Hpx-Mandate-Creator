@@ -8,7 +8,6 @@ export function useAutosave(): void {
   const saveState = useProjectStore((s) => s.saveState)
   const currentProject = useProjectStore((s) => s.currentProject)
   const setSaveState = useProjectStore((s) => s.setSaveState)
-  const setLastSavedVersionId = useProjectStore((s) => s.setLastSavedVersionId)
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const docRef = useRef(document)
@@ -24,13 +23,14 @@ export function useAutosave(): void {
       if (!docRef.current || !currentProject) return
       setSaveState('saving')
       try {
-        const res = await window.electronAPI.projects.saveVersion({
-          projectId: currentProject.id,
+        // Autosave updates the project content in place — it does NOT create
+        // a version. Version snapshots are explicit (Ctrl+S / snapshot button).
+        const res = await window.electronAPI.projects.update({
+          id: currentProject.id,
           content: docRef.current,
         })
         if (res.success) {
           setSaveState('saved')
-          setLastSavedVersionId(res.data.id)
         } else {
           setSaveState('error')
           console.error('[Autosave] Save failed:', res.error)
@@ -44,5 +44,5 @@ export function useAutosave(): void {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [saveState, document, currentProject, setSaveState, setLastSavedVersionId])
+  }, [saveState, document, currentProject, setSaveState])
 }

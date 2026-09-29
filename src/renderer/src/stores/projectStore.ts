@@ -215,6 +215,10 @@ export const useProjectStore = create<ProjectStore>()(
       set((state) => {
         if (!state.document) return
         state.document.variables.push({ id: generateId(), ...data } as never)
+        // Seed the working value from the default so placeholders resolve immediately.
+        if (data.defaultValue !== null && data.defaultValue !== undefined && state.document.variableValues[data.key] === undefined) {
+          state.document.variableValues[data.key] = data.defaultValue
+        }
         state.saveState = 'unsaved'
       }),
 
@@ -222,7 +226,19 @@ export const useProjectStore = create<ProjectStore>()(
       set((state) => {
         if (!state.document) return
         const v = state.document.variables.find((v) => v.id === id)
-        if (v) Object.assign(v, patch)
+        if (!v) return
+        const prevKey = v.key
+        Object.assign(v, patch)
+        // If the key was renamed, migrate any existing value to the new key.
+        if (patch.key && patch.key !== prevKey && prevKey in state.document.variableValues) {
+          state.document.variableValues[patch.key] = state.document.variableValues[prevKey]
+          delete state.document.variableValues[prevKey]
+        }
+        // Seed from a new default when no value has been entered yet.
+        const cur = state.document.variableValues[v.key]
+        if (patch.defaultValue !== null && patch.defaultValue !== undefined && (cur === undefined || cur === null || cur === '')) {
+          state.document.variableValues[v.key] = patch.defaultValue
+        }
         state.saveState = 'unsaved'
       }),
 

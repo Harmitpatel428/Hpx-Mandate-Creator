@@ -17,10 +17,12 @@ import {
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog'
 import { extractPlaceholderKeysFromTiptapJson, extractPlaceholderKeys } from '@/lib/parse-placeholders'
+import { useEditorFocusStore } from '@/stores/editorFocusStore'
 
 export function VariablesPanel() {
   const document = useProjectStore((s) => s.document)
   const { addVariable, updateVariable, removeVariable } = useProjectStore()
+  const activeInsert = useEditorFocusStore((s) => s.activeInsert)
 
   const [showForm, setShowForm] = useState(false)
   const [editingVar, setEditingVar] = useState<Variable | null>(null)
@@ -125,6 +127,8 @@ export function VariablesPanel() {
               usageCount={usageCounts[v.key] ?? 0}
               onEdit={() => { setShowForm(false); setEditingVar(v) }}
               onDelete={() => setDeleteTarget(v)}
+              canInsert={!!activeInsert}
+              onInsert={() => activeInsert?.(v.key, v.label)}
             />
           ))}
         </div>

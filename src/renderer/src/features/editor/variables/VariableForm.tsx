@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { coerceVariableValue, valueToInputString, inputTypeFor } from '@/lib/variable-values'
 
 const VARIABLE_TYPES = [
   { value: 'text', label: 'Text' },
@@ -34,7 +35,21 @@ export function VariableForm({ initial, onSave, onCancel }: Props) {
   const [required, setRequired] = useState(initial?.required ?? false)
   const [optionsRaw, setOptionsRaw] = useState((initial?.options ?? []).join('\n'))
   const [formula, setFormula] = useState(initial?.formula ?? '')
+  const [defaultText, setDefaultText] = useState(
+    initial?.type !== 'boolean' ? valueToInputString(initial?.defaultValue) : '',
+  )
+  const [defaultBool, setDefaultBool] = useState(
+    initial?.type === 'boolean' ? initial?.defaultValue === true : false,
+  )
   const [error, setError] = useState('')
+
+  const options = optionsRaw.split('\n').map((s) => s.trim()).filter(Boolean)
+
+  function computeDefault(): unknown {
+    if (type === 'calculated') return null
+    if (type === 'boolean') return defaultBool
+    return coerceVariableValue(defaultText, type)
+  }
 
   function handleSave() {
     const trimKey = key.trim()
@@ -51,8 +66,8 @@ export function VariableForm({ initial, onSave, onCancel }: Props) {
       type,
       description: description.trim(),
       required,
-      defaultValue: null,
-      options: type === 'select' ? optionsRaw.split('\n').map((s) => s.trim()).filter(Boolean) : undefined,
+      defaultValue: computeDefault(),
+      options: type === 'select' ? options : undefined,
       formula: type === 'calculated' ? formula.trim() : undefined,
     })
   }
@@ -118,6 +133,37 @@ export function VariableForm({ initial, onSave, onCancel }: Props) {
             placeholder="amount * 0.18"
             className="h-8 text-xs font-mono"
           />
+        </div>
+      )}
+
+      {type !== 'calculated' && (
+        <div className="space-y-1">
+          <Label className="text-xs">Default value</Label>
+          {type === 'boolean' ? (
+            <div className="flex items-center gap-2">
+              <Switch checked={defaultBool} onCheckedChange={setDefaultBool} />
+              <span className="text-xs text-muted-foreground">{defaultBool ? 'Yes' : 'No'}</span>
+            </div>
+          ) : type === 'select' ? (
+            <Select value={defaultText || undefined} onValueChange={setDefaultText}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Choose an option" /></SelectTrigger>
+              <SelectContent>
+                {options.length === 0 ? (
+                  <SelectItem value="__none" disabled className="text-xs">Add options above first</SelectItem>
+                ) : (
+                  options.map((o) => <SelectItem key={o} value={o} className="text-xs">{o}</SelectItem>)
+                )}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              type={inputTypeFor(type)}
+              value={defaultText}
+              onChange={(e) => setDefaultText(e.target.value)}
+              placeholder={type === 'currency' ? '0' : 'Optional default'}
+              className="h-8 text-xs"
+            />
+          )}
         </div>
       )}
 

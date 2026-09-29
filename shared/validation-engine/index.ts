@@ -28,12 +28,15 @@ function extractPlaceholders(text: string): string[] {
   return matches.map((m) => m.slice(2, -2))
 }
 
-// Extract text content from Tiptap JSON doc
+// Extract text content from Tiptap JSON doc, including variable-placeholder chips
 function extractTiptapText(content: unknown): string {
   if (!content || typeof content !== 'object') return ''
-  const node = content as { text?: string; content?: unknown[] }
+  const node = content as { type?: string; text?: string; attrs?: { key?: string }; content?: unknown[] }
   const parts: string[] = []
   if (node.text) parts.push(node.text)
+  if (node.type === 'variablePlaceholder' && typeof node.attrs?.key === 'string') {
+    parts.push(`{{${node.attrs.key}}}`)
+  }
   if (Array.isArray(node.content)) {
     for (const child of node.content) {
       parts.push(extractTiptapText(child))

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Braces } from 'lucide-react'
 import type { Variable } from 'shared/document-model/types'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,8 @@ interface Props {
   usageCount: number
   onEdit: () => void
   onDelete: () => void
+  onInsert?: () => void
+  canInsert?: boolean
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -25,7 +27,7 @@ const TYPE_LABELS: Record<string, string> = {
   calculated: 'Formula',
 }
 
-export function VariableRow({ variable, usageCount, onEdit, onDelete }: Props) {
+export function VariableRow({ variable, usageCount, onEdit, onDelete, onInsert, canInsert }: Props) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -68,6 +70,18 @@ export function VariableRow({ variable, usageCount, onEdit, onDelete }: Props) {
 
       {/* Actions */}
       <div className={cn('flex gap-0.5 transition-opacity', hovered ? 'opacity-100' : 'opacity-0')}>
+        {onInsert && variable.type !== 'calculated' && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className={cn('h-6 w-6', canInsert ? 'text-primary hover:text-primary' : 'text-muted-foreground/40')}
+            onClick={onInsert}
+            disabled={!canInsert}
+            title={canInsert ? 'Insert into focused paragraph' : 'Click into a paragraph first'}
+          >
+            <Braces className="h-3 w-3" />
+          </Button>
+        )}
         <Button variant="ghost" size="icon-sm" className="h-6 w-6" onClick={onEdit}>
           <Pencil className="h-3 w-3" />
         </Button>

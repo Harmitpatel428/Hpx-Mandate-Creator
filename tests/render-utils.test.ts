@@ -99,6 +99,28 @@ describe('tiptapToParagraphs', () => {
     }
     expect(tiptapToPlainText(doc)).toBe('line1\nline2')
   })
+
+  it('emits {{key}} for variablePlaceholder chip nodes so they resolve', () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Hello ' },
+            { type: 'variablePlaceholder', attrs: { key: 'client', label: 'Client' } },
+            { type: 'text', text: '!' },
+          ],
+        },
+      ],
+    }
+    const paras = tiptapToParagraphs(doc)
+    const text = paras[0].runs.map((r) => r.text).join('')
+    expect(text).toBe('Hello {{client}}!')
+    // And it resolves through resolvePlaceholders
+    const resolved = resolvePlaceholders(text, { client: 'Acme' }, [v('client', 'text')])
+    expect(resolved).toBe('Hello Acme!')
+  })
 })
 
 describe('section numbering', () => {

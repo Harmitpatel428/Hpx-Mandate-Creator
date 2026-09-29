@@ -60,7 +60,7 @@ export function HeadingBlock({ block, sectionId }: Props) {
         levelClasses[level],
         !block.content && 'text-gray-400 italic',
       )}
-      onDoubleClick={() => setEditing(true)}
+      onClick={() => setEditing(true)}
     >
       {block.content || `Heading ${level}`}
     </p>
