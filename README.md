@@ -36,13 +36,34 @@ npm install
 the native module is unavailable on a given platform, the app automatically falls back
 to a JSON file store, so it still runs.
 
-## Run (development)
+## Development loop
+
+The fastest way to iterate is the **web dev build** — it runs the full renderer
+in a normal browser with hot reload, backed by a `localStorage` shim that
+implements the same API the Electron preload exposes. No Electron, no native
+modules, no packaging needed for day-to-day work.
+
+```bash
+npm run dev:web      # Vite dev server at http://localhost:5174 (opens your browser)
+```
+
+Everything works in the browser: dashboard/CRUD, block editing, variables and
+`{{placeholders}}`, the logic builder, validation, preview, and **DOCX export**
+(downloaded via the browser). Data persists in `localStorage` across reloads.
+The one difference from desktop: **PDF export** opens the browser's print dialog
+(choose "Save as PDF") — one-click native PDF (Electron `printToPDF`) ships only
+in the packaged desktop app.
+
+Edit in your editor → the browser hot-reloads → verify → push.
+
+### Full Electron dev (optional)
 
 ```bash
 npm run dev
 ```
 
-Launches the Electron app with hot-reloading renderer.
+Launches the actual Electron app with a hot-reloading renderer. Use this when you
+need to exercise desktop-only behavior (native PDF export, SQLite storage).
 
 ## Test
 
@@ -65,17 +86,33 @@ npm run lint
 npm run build     # compile main, preload, and renderer into out/
 ```
 
-## Package installers
+## Getting an installer (via GitHub Actions — no local machine needed)
+
+Every push builds installers for all three platforms in CI. This is the
+recommended way to get a Windows `.exe` (or macOS `.dmg`) without owning that OS.
+
+1. `git push` your branch.
+2. Open the repo on GitHub → **Actions** → the latest **Build** run.
+3. Download the artifact from the **Artifacts** section:
+   - `installer-windows-exe` → the NSIS `.exe`
+   - `installer-macos-dmg` → the `.dmg`
+   - `installer-linux-appimage` → the `.AppImage`
+
+The workflow ([`.github/workflows/build.yml`](./.github/workflows/build.yml)) first
+runs typecheck/lint/tests/build, then packages each platform on its native runner
+(where `better-sqlite3` is rebuilt for the Electron ABI, enabling SQLite storage).
+
+### Building installers locally
 
 ```bash
-npm run build:mac     # .dmg (x64 + arm64)
-npm run build:win     # .exe (NSIS installer)
-npm run build:linux   # AppImage
+npm run build:mac     # .dmg (x64 + arm64)  — requires macOS
+npm run build:win     # .exe (NSIS)         — requires Windows
+npm run build:linux   # AppImage            — requires Linux
 ```
 
-Packaging is configured in [`electron-builder.yml`](./electron-builder.yml). Each target
-must be built on (or cross-compiled for) its own platform; code signing is not configured
-and should be added before public distribution.
+Packaging is configured in [`electron-builder.yml`](./electron-builder.yml). Each
+target must be built on its own platform. Code signing is not configured and should
+be added before public distribution.
 
 ## Data & storage
 

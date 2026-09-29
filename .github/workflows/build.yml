@@ -1,0 +1,73 @@
+name: Build
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  # Fast checks — typecheck, lint, tests, and the renderer/main bundle.
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck:node
+      - run: npm run typecheck:web
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  # Platform installers. Native deps (better-sqlite3) are rebuilt for the
+  # Electron ABI on each runner, which needs network access GitHub provides.
+  package:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: build:win
+            name: windows-exe
+            globs: |
+              release/*.exe
+              release/*.blockmap
+              release/latest*.yml
+          - os: macos-latest
+            script: build:mac
+            name: macos-dmg
+            globs: |
+              release/*.dmg
+              release/*.blockmap
+              release/latest*.yml
+          - os: ubuntu-latest
+            script: build:linux
+            name: linux-appimage
+            globs: |
+              release/*.AppImage
+              release/latest*.yml
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build installer
+        run: npm run ${{ matrix.script }}
+        env:
+          # Do not attempt code signing / notarization in CI (unsigned build).
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.name }}
+          path: ${{ matrix.globs }}
+          if-no-files-found: error
+          retention-days: 30
