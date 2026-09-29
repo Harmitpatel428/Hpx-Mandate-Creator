@@ -1,18 +1,9 @@
 import * as React from 'react'
-import { NodeViewWrapper } from '@tiptap/react'
+import { NodeViewWrapper, type NodeViewProps } from '@tiptap/react'
 
-interface Props {
-  node: {
-    attrs: {
-      key: string
-      label?: string
-    }
-  }
-  selected: boolean
-}
-
-export function VariablePlaceholderComponent({ node, selected }: Props) {
-  const { key, label } = node.attrs
+export function VariablePlaceholderComponent({ node, selected }: NodeViewProps) {
+  const key = (node.attrs.key as string | null) ?? ''
+  const label = node.attrs.label as string | undefined
   const displayText = label || key
 
   return (

@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Variable } from 'shared/document-model/types'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 interface Props {

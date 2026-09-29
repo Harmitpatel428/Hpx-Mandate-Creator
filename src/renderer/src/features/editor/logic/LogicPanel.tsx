@@ -1,16 +1,15 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Plus, Trash2, ChevronDown, ChevronUp, GitBranch, Eye, EyeOff } from 'lucide-react'
+import { Plus, Trash2, ChevronDown, ChevronUp, GitBranch, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { useProjectStore } from '@/stores/projectStore'
 import { generateId } from 'shared/utils/id'
 import { conditionGroupToEnglish } from 'shared/logic-engine/evaluator'
-import type { LogicRule, Variable, Section, Block } from 'shared/document-model/types'
+import type { LogicRule, Variable, Section } from 'shared/document-model/types'
 import { cn } from '@/lib/utils'
 
 const OPERATORS = [

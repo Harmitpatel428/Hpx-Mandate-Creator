@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { AlertCircle, AlertTriangle, CheckCircle2, RefreshCw, CheckSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useProjectStore } from '@/stores/projectStore'
@@ -18,7 +18,6 @@ const CODE_LABELS: Record<string, string> = {
 
 function ResultItem({ result }: { result: ValidationResult }) {
   const { setActiveBlockId, setActiveSectionId, setActivePanel } = useUiStore()
-  const document = useProjectStore((s) => s.document)
 
   function focusTarget() {
     if (result.targetType === 'block') {

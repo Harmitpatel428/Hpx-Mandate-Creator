@@ -1,10 +1,8 @@
 import * as React from 'react'
-import { useState } from 'react'
 import type { TableBlock as TableBlockType } from 'shared/document-model/types'
 import { useProjectStore } from '@/stores/projectStore'
 import { Plus } from 'lucide-react'
 import { generateId } from 'shared/utils/id'
-import { Button } from '@/components/ui/button'
 
 interface Props {
   block: TableBlockType

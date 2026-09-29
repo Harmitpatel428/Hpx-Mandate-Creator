@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FileText, Layers, Square, Info } from 'lucide-react'
-import { formatDate } from 'shared/utils/format'
 import { PROJECT_STATUS_LABELS, type Block, type Section } from 'shared/document-model/types'
 
 // ---- Document-level properties ----
