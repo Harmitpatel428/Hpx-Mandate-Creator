@@ -195,7 +195,7 @@ export function EditorCanvas() {
             <div className="flex flex-col items-center gap-4 py-16 text-center">
               <p className="text-sm text-gray-400">This document has no sections yet.</p>
               <button
-                onClick={addSection}
+                onClick={() => addSection()}
                 className="flex items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
               >
                 <Plus className="h-4 w-4" />

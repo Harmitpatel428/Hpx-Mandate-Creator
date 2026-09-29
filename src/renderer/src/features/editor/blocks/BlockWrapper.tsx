@@ -48,7 +48,7 @@ export function BlockWrapper({ block, sectionId, children, isLocked }: BlockWrap
       )}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={() => setActiveBlockId(block.id)}
+      onClick={(e) => { e.stopPropagation(); setActiveBlockId(block.id) }}
     >
       {/* Drag handle + actions - shown on hover */}
       {!isLocked && (
