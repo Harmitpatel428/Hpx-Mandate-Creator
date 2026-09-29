@@ -16,6 +16,9 @@
     "typecheck:web": "tsc --project tsconfig.web.json --noEmit",
     "pack": "electron-vite build && electron-builder --dir",
     "dist": "electron-vite build && electron-builder",
+    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:win": "electron-vite build && electron-builder --win",
+    "build:linux": "electron-vite build && electron-builder --linux",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -80,52 +83,5 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.21",
     "vitest": "^2.1.9"
-  },
-  "build": {
-    "appId": "com.hpx.mandate-creator",
-    "productName": "Master Mandate Creator",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "out/**/*",
-      "!out/**/*.map"
-    ],
-    "mac": {
-      "category": "public.app-category.productivity",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ]
-    },
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "asar": true,
-    "asarUnpack": [
-      "node_modules/better-sqlite3/**/*"
-    ]
   }
 }

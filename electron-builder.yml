@@ -1,0 +1,54 @@
+appId: com.hpx.mandate-creator
+productName: Master Mandate Creator
+copyright: Copyright © 2026 Harmit Patel
+
+directories:
+  output: release
+  buildResources: build
+
+# Only the compiled output and production node_modules are packaged.
+files:
+  - out/**/*
+  - '!out/**/*.map'
+  - package.json
+
+# better-sqlite3 ships a native .node binary that must stay outside the asar
+# archive so it can be loaded at runtime.
+asar: true
+asarUnpack:
+  - node_modules/better-sqlite3/**/*
+
+npmRebuild: true
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+dmg:
+  title: ${productName}
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: Office
