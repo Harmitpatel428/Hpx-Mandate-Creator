@@ -32,7 +32,7 @@ export function TemplateGallery() {
     load()
   }, [load])
 
-  async function useTemplate(t: TemplateRecord) {
+  async function applyTemplate(t: TemplateRecord) {
     setBusyId(t.id)
     try {
       const res = await window.electronAPI.templates.instantiate({ templateId: t.id })
@@ -108,7 +108,7 @@ export function TemplateGallery() {
             </p>
 
             <div className="flex items-center gap-2 mt-3">
-              <Button size="sm" className="flex-1" onClick={() => useTemplate(t)} disabled={busyId === t.id}>
+              <Button size="sm" className="flex-1" onClick={() => applyTemplate(t)} disabled={busyId === t.id}>
                 {busyId === t.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Plus className="h-3.5 w-3.5 mr-1" /> Use</>}
               </Button>
               <Button size="sm" variant="outline" onClick={() => setPreview(t)}>
@@ -119,7 +119,7 @@ export function TemplateGallery() {
         ))}
       </div>
 
-      <TemplatePreviewModal template={preview} open={!!preview} onClose={() => setPreview(null)} onUse={useTemplate} />
+      <TemplatePreviewModal template={preview} open={!!preview} onClose={() => setPreview(null)} onUse={applyTemplate} />
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}

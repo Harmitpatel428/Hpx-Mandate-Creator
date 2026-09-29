@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync } from 'fs'
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync, renameSync } from 'fs'
 import { join } from 'path'
 import type {
   IProjectRepository,
@@ -36,7 +36,6 @@ export class JsonRepository implements IProjectRepository {
     writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf-8')
     // On non-Windows, rename is atomic. On Windows, we overwrite directly.
     try {
-      const { renameSync } = require('fs')
       renameSync(tmp, path)
     } catch {
       writeFileSync(path, JSON.stringify(data, null, 2), 'utf-8')

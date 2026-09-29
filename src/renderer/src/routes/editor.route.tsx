@@ -29,6 +29,8 @@ export default function EditorRoute() {
       })
       .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load'))
       .finally(() => setIsLoading(false))
+    // Re-run only when the route id changes; loadProject/navigate are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   if (isLoading) {

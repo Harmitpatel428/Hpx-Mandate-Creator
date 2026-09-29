@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { resolveDocument } from '../../shared/logic-engine/resolver'
-import type { MandateDocument, Variable, Section, Block, LogicRule } from '../../shared/document-model/types'
+import type { MandateDocument, Section, Block, LogicRule } from '../../shared/document-model/types'
 
 function makeDoc(overrides: Partial<MandateDocument> = {}): MandateDocument {
   const now = new Date().toISOString()
