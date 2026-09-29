@@ -1,4 +1,8 @@
 import type { MandateDocument, DocumentStatus } from '../document-model/types'
+import type { PageSizeSchema } from '../document-model/schema'
+import type { z } from 'zod'
+
+export type PageSize = z.infer<typeof PageSizeSchema>
 
 export type IpcResponse<T> =
   | { success: true; data: T }
@@ -87,6 +91,34 @@ export interface DialogShowSaveRequest {
   filters?: Array<{ name: string; extensions: string[] }>
 }
 
+// ---- Export ----
+
+export interface ValidationIssue {
+  code: string
+  severity: 'error' | 'warning'
+  message: string
+  targetId: string
+  targetType: 'block' | 'section' | 'variable' | 'document'
+}
+
+export interface ExportRequest {
+  projectId: string
+  filePath: string
+  pageSize?: PageSize
+}
+
+export interface ExportResult {
+  filePath: string
+}
+
+/**
+ * When export is blocked by server-side validation, the response is a
+ * failure carrying the validation errors so the renderer can surface them.
+ */
+export type ExportResponse =
+  | { success: true; data: ExportResult }
+  | { success: false; error: string; code?: string; issues?: ValidationIssue[] }
+
 // ---- Response aliases ----
 
 export type ProjectListResponse = IpcResponse<ProjectRecord[]>
@@ -101,3 +133,5 @@ export type ProjectGetVersionResponse = IpcResponse<ProjectVersionRecord>
 export type SettingsGetResponse = IpcResponse<unknown>
 export type SettingsSetResponse = IpcResponse<void>
 export type DialogShowSaveResponse = IpcResponse<string | null>
+export type ExportDocxResponse = ExportResponse
+export type ExportPdfResponse = ExportResponse

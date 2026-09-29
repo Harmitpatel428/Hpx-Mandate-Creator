@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AutosaveIndicator } from './AutosaveIndicator'
+import { ExportModal } from './ExportModal'
 import { useProjectStore } from '@/stores/projectStore'
 import { useProject } from '@/hooks/useProject'
 
@@ -18,7 +19,20 @@ export function EditorTopBar() {
 
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
+  const [exportOpen, setExportOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  async function handlePreview() {
+    if (!currentProject || !document) return
+    // Persist current edits so the preview (which loads from the DB) is current.
+    try {
+      await updateProject({ id: currentProject.id, content: document })
+      setSaveState('saved')
+    } catch (err) {
+      console.error('Failed to save before preview:', err)
+    }
+    navigate(`/preview/${currentProject.id}`)
+  }
 
   const title = document?.metadata.title ?? currentProject?.title ?? 'Untitled'
 
@@ -99,21 +113,23 @@ export function EditorTopBar() {
       <div className="flex items-center gap-1 titlebar-no-drag">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon-sm" disabled>
+            <Button variant="ghost" size="icon-sm" onClick={handlePreview} disabled={!currentProject}>
               <Eye className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Preview (Phase 4)</TooltipContent>
+          <TooltipContent>Preview</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon-sm" disabled>
+            <Button variant="ghost" size="icon-sm" onClick={() => setExportOpen(true)} disabled={!currentProject}>
               <Download className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Export (Phase 4)</TooltipContent>
+          <TooltipContent>Export</TooltipContent>
         </Tooltip>
       </div>
+
+      <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>
   )
 }

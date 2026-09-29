@@ -93,38 +93,29 @@ export function topologicalSort(variables: Variable[]): string[] {
 
 function findCycle(nodes: string[], edges: Map<string, Set<string>>): string[] {
   const visited = new Set<string>()
-  const path: string[] = []
-  const pathSet = new Set<string>()
+  const stack: string[] = []
+  const inStack = new Set<string>()
+  let result: string[] = []
 
   function dfs(key: string): boolean {
-    if (pathSet.has(key)) {
-      const idx = path.indexOf(key)
-      return true, path.splice(0, 0, ...path.slice(idx)), true
-    }
-    if (visited.has(key)) return false
     visited.add(key)
-    path.push(key)
-    pathSet.add(key)
+    stack.push(key)
+    inStack.add(key)
     for (const dep of edges.get(key) ?? []) {
-      if (dfs(dep)) {
-        const cycleStart = path.indexOf(dep)
-        if (cycleStart !== -1) {
-          path.splice(0, cycleStart)
-        }
+      if (inStack.has(dep)) {
+        const idx = stack.indexOf(dep)
+        result = [...stack.slice(idx), dep]
         return true
       }
+      if (!visited.has(dep) && dfs(dep)) return true
     }
-    path.pop()
-    pathSet.delete(key)
+    stack.pop()
+    inStack.delete(key)
     return false
   }
 
   for (const key of nodes) {
-    path.length = 0
-    pathSet.clear()
-    if (dfs(key)) {
-      return [...path, path[0]]
-    }
+    if (!visited.has(key) && dfs(key)) return result
   }
   return nodes.slice(0, 2) // fallback
 }

@@ -1,0 +1,170 @@
+/*
+ * Print / export stylesheet for the read-only preview renderer.
+ * Page size and margins are injected dynamically per-document via a
+ * <style> tag (see PreviewRenderer). printToPDF is called with
+ * preferCSSPageSize + printBackground so these rules are authoritative.
+ */
+
+:root {
+  --preview-fg: #1a1a1a;
+  --preview-muted: #6b7280;
+  --preview-rule: #d1d5db;
+  --preview-accent: #1d4ed8;
+}
+
+.preview-root {
+  background: #f3f4f6;
+  min-height: 100vh;
+  padding: 32px 16px;
+  color: var(--preview-fg);
+}
+
+/* The simulated page sheet on screen. */
+.preview-page {
+  background: #ffffff;
+  margin: 0 auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+/* Export mode: strip screen chrome so only the sheet remains. */
+.preview-root.is-export {
+  background: #ffffff;
+  padding: 0;
+}
+.preview-root.is-export .preview-page {
+  box-shadow: none;
+  margin: 0;
+}
+
+.preview-doc-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem;
+}
+.preview-doc-desc {
+  color: var(--preview-muted);
+  font-size: 0.95rem;
+  margin: 0 0 0.25rem;
+}
+.preview-doc-meta {
+  color: var(--preview-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+.preview-doc-header {
+  border-bottom: 1px solid var(--preview-rule);
+  padding-bottom: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.preview-section {
+  margin-bottom: 1.5rem;
+  break-inside: avoid;
+}
+.preview-section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+  break-after: avoid;
+}
+.preview-section-num {
+  color: var(--preview-muted);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.4rem;
+}
+
+.preview-block {
+  margin: 0 0 0.7rem;
+  break-inside: avoid;
+}
+.preview-h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+.preview-h2 { font-size: 1.25rem; font-weight: 700; margin: 0.9rem 0 0.45rem; }
+.preview-h3 { font-size: 1.08rem; font-weight: 600; margin: 0.8rem 0 0.4rem; }
+.preview-p { margin: 0 0 0.55rem; }
+.preview-list { margin: 0 0 0.6rem; padding-left: 1.4rem; }
+.preview-list li { margin: 0.15rem 0; }
+
+.preview-note {
+  border-left: 3px solid var(--preview-accent);
+  background: #eff6ff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+.preview-note.is-warning {
+  border-left-color: #d97706;
+  background: #fffbeb;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 0.8rem;
+  font-size: 0.9rem;
+}
+.preview-table th,
+.preview-table td {
+  border: 1px solid var(--preview-rule);
+  padding: 0.35rem 0.55rem;
+  text-align: left;
+  vertical-align: top;
+}
+.preview-table th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.preview-signature {
+  margin: 1.4rem 0 0.6rem;
+  break-inside: avoid;
+}
+.preview-sig-line {
+  border-bottom: 1px solid var(--preview-fg);
+  width: 260px;
+  height: 2.2rem;
+}
+.preview-sig-name { font-weight: 600; margin-top: 0.35rem; }
+.preview-sig-title { color: var(--preview-muted); font-size: 0.85rem; }
+.preview-sig-meta { color: var(--preview-muted); font-size: 0.8rem; margin-top: 0.5rem; }
+
+.preview-page-break {
+  break-after: page;
+  height: 0;
+  margin: 0;
+  border: 0;
+}
+
+/* Draft watermark. */
+.preview-watermark {
+  position: fixed;
+  top: 45%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 6rem;
+  font-weight: 800;
+  color: rgba(220, 38, 38, 0.08);
+  transform: rotate(-24deg);
+  pointer-events: none;
+  z-index: 0;
+  letter-spacing: 0.1em;
+}
+
+@media print {
+  .preview-root,
+  .preview-root.is-export {
+    background: #ffffff;
+    padding: 0;
+  }
+  .preview-page {
+    box-shadow: none;
+    margin: 0;
+    width: auto;
+  }
+  .preview-watermark {
+    position: fixed;
+  }
+}

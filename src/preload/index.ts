@@ -25,6 +25,9 @@ import type {
   SettingsSetResponse,
   DialogShowSaveRequest,
   DialogShowSaveResponse,
+  ExportRequest,
+  ExportDocxResponse,
+  ExportPdfResponse,
 } from 'shared/ipc/types'
 
 const electronAPI = {
@@ -63,6 +66,13 @@ const electronAPI = {
   dialog: {
     showSavePath: (req: DialogShowSaveRequest): Promise<DialogShowSaveResponse> =>
       ipcRenderer.invoke(IPC.DIALOG_SHOW_SAVE, req),
+  },
+
+  exports: {
+    docx: (req: ExportRequest): Promise<ExportDocxResponse> =>
+      ipcRenderer.invoke(IPC.EXPORT_DOCX, req),
+    pdf: (req: ExportRequest): Promise<ExportPdfResponse> =>
+      ipcRenderer.invoke(IPC.EXPORT_PDF, req),
   },
 }
 

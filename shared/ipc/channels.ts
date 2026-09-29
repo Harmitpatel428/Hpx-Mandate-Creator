@@ -12,6 +12,9 @@ export const IPC = {
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
 
+  EXPORT_DOCX: 'export:docx',
+  EXPORT_PDF: 'export:pdf',
+
   APP_GET_VERSION: 'app:get-version',
   DIALOG_SHOW_SAVE: 'dialog:show-save',
 } as const

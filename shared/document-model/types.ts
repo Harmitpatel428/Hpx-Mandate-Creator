@@ -14,6 +14,7 @@ import {
   ExportSettingsSchema,
   DocumentStatusSchema,
   ConfidentialitySchema,
+  PageSizeSchema,
   HeadingBlockSchema,
   ParagraphBlockSchema,
   TableBlockSchema,
@@ -40,6 +41,7 @@ export type VersionMetadata = z.infer<typeof VersionMetadataSchema>
 export type ExportSettings = z.infer<typeof ExportSettingsSchema>
 export type DocumentStatus = z.infer<typeof DocumentStatusSchema>
 export type Confidentiality = z.infer<typeof ConfidentialitySchema>
+export type PageSize = z.infer<typeof PageSizeSchema>
 
 export type SaveState = 'saved' | 'saving' | 'unsaved' | 'error'
 

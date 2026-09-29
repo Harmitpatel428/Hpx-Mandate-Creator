@@ -20,6 +20,7 @@ import { useProjectStore } from '@/stores/projectStore'
 import { VariablesPanel } from './variables/VariablesPanel'
 import { LogicPanel } from './logic/LogicPanel'
 import { ValidationPanel } from './validation/ValidationPanel'
+import { VersionHistoryPanel } from './VersionHistoryPanel'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -194,15 +195,22 @@ export function EditorLeftSidebar() {
           {/* Validation panel */}
           {activePanel === 'validation' && <ValidationPanel />}
 
+          {/* Versions panel */}
+          {activePanel === 'versions' && <VersionHistoryPanel />}
+
           {/* Future panels */}
-          {activePanel !== 'properties' && activePanel !== 'variables' && activePanel !== 'logic' && activePanel !== 'validation' && (
-            <div className="flex flex-col items-center justify-center gap-2 pt-8 text-center">
-              <p className="text-xs text-muted-foreground">
-                {NAV_ITEMS.find((n) => n.id === activePanel)?.label} panel
-              </p>
-              <p className="text-xs text-muted-foreground/60">Available in a future phase</p>
-            </div>
-          )}
+          {activePanel !== 'properties' &&
+            activePanel !== 'variables' &&
+            activePanel !== 'logic' &&
+            activePanel !== 'validation' &&
+            activePanel !== 'versions' && (
+              <div className="flex flex-col items-center justify-center gap-2 pt-8 text-center">
+                <p className="text-xs text-muted-foreground">
+                  {NAV_ITEMS.find((n) => n.id === activePanel)?.label} panel
+                </p>
+                <p className="text-xs text-muted-foreground/60">Available in a future phase</p>
+              </div>
+            )}
         </div>
       </ScrollArea>
     </div>

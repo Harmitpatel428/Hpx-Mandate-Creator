@@ -4,6 +4,7 @@ import type { ProjectService } from '../services/project.service'
 import type { SettingsService } from '../services/settings.service'
 import { registerProjectHandlers } from './project.handlers'
 import { registerSettingsHandlers } from './settings.handlers'
+import { registerExportHandlers } from './export.handlers'
 
 export function registerAllHandlers(
   projectService: ProjectService,
@@ -11,6 +12,7 @@ export function registerAllHandlers(
 ): void {
   registerProjectHandlers(projectService)
   registerSettingsHandlers(settingsService)
+  registerExportHandlers(projectService)
 
   ipcMain.handle(IPC.APP_GET_VERSION, () => app.getVersion())
 
