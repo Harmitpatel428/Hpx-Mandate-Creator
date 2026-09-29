@@ -150,7 +150,7 @@ export const HeadingBlockSchema = BaseBlockSchema.extend({
 
 export const ParagraphBlockSchema = BaseBlockSchema.extend({
   type: z.literal('paragraph'),
-  content: z.string().default(''),
+  content: z.unknown().default(null), // Tiptap JSON doc or null
 })
 
 export const PlainTextBlockSchema = BaseBlockSchema.extend({

@@ -1,51 +1,173 @@
 import * as React from 'react'
-import { Plus, Type, AlignLeft } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, ChevronDown } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { useProjectStore } from '@/stores/projectStore'
-import { addSection } from 'shared/document-model/transforms'
-import { generateId } from 'shared/utils/id'
+import { useUiStore } from '@/stores/uiStore'
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { BlockWrapper } from './blocks/BlockWrapper'
+import { HeadingBlock } from './blocks/HeadingBlock'
+import { ParagraphBlock } from './blocks/ParagraphBlock'
+import { PageBreakBlock } from './blocks/PageBreakBlock'
+import { NoteBlock } from './blocks/NoteBlock'
+import { SignatureBlock } from './blocks/SignatureBlock'
+import { TableBlock } from './blocks/TableBlock'
+import type { Block, Section } from 'shared/document-model/types'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+const BLOCK_TYPES: { type: Block['type']; label: string }[] = [
+  { type: 'heading', label: 'Heading' },
+  { type: 'paragraph', label: 'Paragraph' },
+  { type: 'note', label: 'Note' },
+  { type: 'table', label: 'Table' },
+  { type: 'signature', label: 'Signature Block' },
+  { type: 'page-break', label: 'Page Break' },
+]
+
+function BlockRenderer({ block, sectionId }: { block: Block; sectionId: string }) {
+  switch (block.type) {
+    case 'heading':
+      return <HeadingBlock block={block} sectionId={sectionId} />
+    case 'paragraph':
+      return <ParagraphBlock block={block} sectionId={sectionId} />
+    case 'page-break':
+      return <PageBreakBlock />
+    case 'note':
+      return <NoteBlock block={block} sectionId={sectionId} />
+    case 'signature':
+      return <SignatureBlock block={block} />
+    case 'table':
+      return <TableBlock block={block} sectionId={sectionId} />
+    default:
+      return (
+        <div className="rounded border border-dashed border-gray-200 p-3 text-xs text-gray-400 italic">
+          {block.type} block (editor coming in a later phase)
+        </div>
+      )
+  }
+}
+
+function SectionView({ section, sectionIndex }: { section: Section; sectionIndex: number }) {
+  const { addBlock, reorderBlocks, updateSection } = useProjectStore()
+  const { setActiveSectionId, setActiveBlockId } = useUiStore()
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState(section.title)
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const ids = section.blocks.map((b) => b.id)
+    const oldIdx = ids.indexOf(active.id as string)
+    const newIdx = ids.indexOf(over.id as string)
+    if (oldIdx === -1 || newIdx === -1) return
+    const reordered = [...ids]
+    reordered.splice(oldIdx, 1)
+    reordered.splice(newIdx, 0, active.id as string)
+    reorderBlocks(section.id, reordered)
+  }
+
+  function commitTitle() {
+    setEditingTitle(false)
+    const trimmed = titleDraft.trim()
+    if (trimmed !== section.title) {
+      updateSection(section.id, { title: trimmed })
+    }
+  }
+
+  return (
+    <div
+      className="group/section"
+      onClick={() => { setActiveSectionId(section.id); setActiveBlockId(null) }}
+    >
+      {/* Section header */}
+      <div className="flex items-baseline gap-2 mb-3">
+        <span className="text-xs font-mono text-gray-400 w-5 shrink-0">{sectionIndex + 1}.</span>
+        {editingTitle ? (
+          <input
+            value={titleDraft}
+            onChange={(e) => setTitleDraft(e.target.value)}
+            onBlur={commitTitle}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'Escape') commitTitle()
+            }}
+            className="flex-1 bg-transparent text-base font-semibold text-gray-800 outline-none border-b border-primary/60 pb-0.5"
+            maxLength={300}
+            autoFocus
+          />
+        ) : (
+          <h2
+            className="flex-1 text-base font-semibold text-gray-800 cursor-text"
+            onDoubleClick={() => { setTitleDraft(section.title); setEditingTitle(true) }}
+          >
+            {section.title || <span className="text-gray-400 font-normal italic text-sm">Untitled Section</span>}
+          </h2>
+        )}
+      </div>
+
+      {/* Blocks */}
+      <div className="ml-7 space-y-2">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={section.blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
+            {section.blocks.map((block) => (
+              <BlockWrapper key={block.id} block={block} sectionId={section.id} isLocked={block.locked}>
+                <BlockRenderer block={block} sectionId={section.id} />
+              </BlockWrapper>
+            ))}
+          </SortableContext>
+        </DndContext>
+
+        {/* Add block */}
+        <div className="pt-1 opacity-0 group-hover/section:opacity-100 transition-opacity">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                <Plus className="h-3 w-3" />
+                Add block
+                <ChevronDown className="h-3 w-3 opacity-60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-44">
+              {BLOCK_TYPES.map((bt) => (
+                <DropdownMenuItem
+                  key={bt.type}
+                  className="text-xs"
+                  onClick={() => addBlock(section.id, bt.type)}
+                >
+                  {bt.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function EditorCanvas() {
   const document = useProjectStore((s) => s.document)
-  const setDocument = useProjectStore((s) => s.setDocument)
-  const setSaveState = useProjectStore((s) => s.setSaveState)
+  const { addSection } = useProjectStore()
 
   const sections = document?.sections ?? []
 
-  function handleAddSection() {
-    if (!document) return
-    const updated = addSection(document, { title: 'New Section' })
-    setDocument(updated)
-    setSaveState('unsaved')
-  }
-
-  function handleAddHeading(sectionId: string) {
-    if (!document) return
-    const section = document.sections.find((s) => s.id === sectionId)
-    if (!section) return
-    const block = { id: generateId(), type: 'heading' as const, level: 1 as const, content: 'Heading', hidden: false, locked: false, required: false }
-    const updated = {
-      ...document,
-      sections: document.sections.map((s) =>
-        s.id === sectionId ? { ...s, blocks: [...s.blocks, block] } : s,
-      ),
-    }
-    setDocument(updated)
-    setSaveState('unsaved')
-  }
-
-  function handleAddParagraph(sectionId: string) {
-    if (!document) return
-    const block = { id: generateId(), type: 'paragraph' as const, content: 'Enter text here…', hidden: false, locked: false, required: false }
-    const updated = {
-      ...document,
-      sections: document.sections.map((s) =>
-        s.id === sectionId ? { ...s, blocks: [...s.blocks, block] } : s,
-      ),
-    }
-    setDocument(updated)
-    setSaveState('unsaved')
+  if (!document) {
+    return (
+      <ScrollArea className="h-full bg-[hsl(0,0%,5%)]">
+        <div className="flex items-center justify-center h-full">
+          <p className="text-sm text-muted-foreground">No document loaded</p>
+        </div>
+      </ScrollArea>
+    )
   }
 
   return (
@@ -54,15 +176,18 @@ export function EditorCanvas() {
         {/* A4 page simulation */}
         <div
           className="w-full max-w-2xl bg-white text-gray-900 shadow-xl rounded-sm"
-          style={{ minHeight: '842px', padding: '64px 72px' }}
+          style={{ minHeight: '842px', padding: '64px 72px 80px' }}
         >
           {/* Document title */}
-          <div className="mb-8 border-b border-gray-200 pb-6">
+          <div className="mb-10 border-b border-gray-200 pb-6">
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-              {document?.metadata.title ?? 'Untitled Mandate'}
+              {document.metadata.title || 'Untitled Mandate'}
             </h1>
-            {document?.metadata.description && (
+            {document.metadata.description && (
               <p className="mt-2 text-sm text-gray-500">{document.metadata.description}</p>
+            )}
+            {document.metadata.author && (
+              <p className="mt-1 text-xs text-gray-400">{document.metadata.author}</p>
             )}
           </div>
 
@@ -71,7 +196,7 @@ export function EditorCanvas() {
             <div className="flex flex-col items-center gap-4 py-16 text-center">
               <p className="text-sm text-gray-400">This document has no sections yet.</p>
               <button
-                onClick={handleAddSection}
+                onClick={addSection}
                 className="flex items-center gap-2 rounded-md border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
               >
                 <Plus className="h-4 w-4" />
@@ -79,47 +204,9 @@ export function EditorCanvas() {
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {sections.map((section, sIdx) => (
-                <div key={section.id} className="group">
-                  {/* Section header */}
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-xs font-mono text-gray-400 w-6">{sIdx + 1}.</span>
-                    <h2 className="text-base font-semibold text-gray-800">{section.title || 'Untitled Section'}</h2>
-                  </div>
-
-                  {/* Blocks */}
-                  <div className="ml-8 space-y-2">
-                    {section.blocks.map((block) => (
-                      <div key={block.id} className="group/block">
-                        {block.type === 'heading' && (
-                          <p className="font-semibold text-gray-800">{block.content as string}</p>
-                        )}
-                        {block.type === 'paragraph' && (
-                          <p className="text-sm text-gray-700 leading-relaxed">{block.content as string}</p>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* Add block buttons */}
-                    <div className="flex gap-2 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleAddHeading(section.id)}
-                        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                      >
-                        <Type className="h-3 w-3" />
-                        Heading
-                      </button>
-                      <button
-                        onClick={() => handleAddParagraph(section.id)}
-                        className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                      >
-                        <AlignLeft className="h-3 w-3" />
-                        Paragraph
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <SectionView key={section.id} section={section} sectionIndex={sIdx} />
               ))}
             </div>
           )}
@@ -130,7 +217,7 @@ export function EditorCanvas() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleAddSection}
+            onClick={() => addSection()}
             className="gap-2 border-dashed border-border text-muted-foreground hover:text-foreground"
           >
             <Plus className="h-4 w-4" />

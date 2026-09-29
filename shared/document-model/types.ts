@@ -18,6 +18,7 @@ import {
   ParagraphBlockSchema,
   TableBlockSchema,
   SignatureBlockSchema,
+  NoteBlockSchema,
 } from './schema'
 
 export type MandateDocument = z.infer<typeof DocumentSchema>
@@ -32,6 +33,7 @@ export type HeadingBlock = z.infer<typeof HeadingBlockSchema>
 export type ParagraphBlock = z.infer<typeof ParagraphBlockSchema>
 export type TableBlock = z.infer<typeof TableBlockSchema>
 export type SignatureBlock = z.infer<typeof SignatureBlockSchema>
+export type NoteBlock = z.infer<typeof NoteBlockSchema>
 export type Section = z.infer<typeof SectionSchema>
 export type LogicRule = z.infer<typeof LogicRuleSchema>
 export type VersionMetadata = z.infer<typeof VersionMetadataSchema>

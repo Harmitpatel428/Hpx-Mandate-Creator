@@ -64,7 +64,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium text-foreground truncate leading-tight">
+            <h3 className="text-sm font-medium text-foreground truncate leading-tight" title={project.title}>
               {project.title}
             </h3>
             {project.author && (

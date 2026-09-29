@@ -82,6 +82,7 @@ export function EditorTopBar() {
         ) : (
           <button
             onClick={startEditing}
+            title={title}
             className="text-sm font-medium text-foreground truncate max-w-sm hover:text-primary transition-colors cursor-text text-left"
           >
             {title}
