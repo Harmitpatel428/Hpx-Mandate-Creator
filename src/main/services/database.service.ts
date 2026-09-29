@@ -2,6 +2,8 @@ import { app } from 'electron'
 import { join } from 'path'
 import { readFileSync, existsSync, mkdirSync } from 'fs'
 import type { IProjectRepository } from '../db/repository'
+import { SqliteRepository } from '../db/sqlite.repository'
+import { JsonRepository } from '../db/json.repository'
 
 export type StorageEngine = 'sqlite' | 'json'
 
@@ -34,7 +36,6 @@ export function initDatabase(): { repo: IProjectRepository; engine: StorageEngin
 
     runMigrations(db)
 
-    const { SqliteRepository } = require('../db/sqlite.repository') as typeof import('../db/sqlite.repository')
     _repo = new SqliteRepository(db)
     _engine = 'sqlite'
     console.warn(`[DB] Using SQLite at ${dbPath}`)
@@ -42,7 +43,6 @@ export function initDatabase(): { repo: IProjectRepository; engine: StorageEngin
     console.warn('[DB] SQLite unavailable, falling back to JSON storage:', err)
     const storageDir = join(userData, 'storage')
     mkdirSync(storageDir, { recursive: true })
-    const { JsonRepository } = require('../db/json.repository') as typeof import('../db/json.repository')
     _repo = new JsonRepository(storageDir)
     _engine = 'json'
     console.warn(`[DB] Using JSON storage at ${storageDir}`)
