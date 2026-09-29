@@ -1,4 +1,5 @@
-import type { MandateDocument, DocumentStatus } from '../document-model/types'
+import type { MandateDocument, DocumentStatus, Section, Block, Variable } from '../document-model/types'
+import type { TemplateRecord, ClauseRecord, ClauseKind } from '../document-model/library'
 import type { PageSizeSchema } from '../document-model/schema'
 import type { z } from 'zod'
 
@@ -135,3 +136,46 @@ export type SettingsSetResponse = IpcResponse<void>
 export type DialogShowSaveResponse = IpcResponse<string | null>
 export type ExportDocxResponse = ExportResponse
 export type ExportPdfResponse = ExportResponse
+
+// ---- Template library ----
+
+export interface TemplateCreateRequest {
+  name: string
+  description?: string
+  category?: string
+  content: MandateDocument
+}
+export interface TemplateGetRequest { id: string }
+export interface TemplateDeleteRequest { id: string }
+export interface TemplateInstantiateRequest {
+  templateId: string
+  title?: string
+  author?: string
+}
+
+export type TemplateListResponse = IpcResponse<TemplateRecord[]>
+export type TemplateGetResponse = IpcResponse<TemplateRecord>
+export type TemplateCreateResponse = IpcResponse<TemplateRecord>
+export type TemplateDeleteResponse = IpcResponse<{ id: string }>
+export type TemplateInstantiateResponse = IpcResponse<ProjectRecord>
+
+// ---- Clause library ----
+
+export interface ClauseCreateRequest {
+  name: string
+  description?: string
+  category?: string
+  tags?: string[]
+  kind: ClauseKind
+  section?: Section | null
+  blocks?: Block[]
+  variables?: Variable[]
+}
+export interface ClauseListRequest { category?: string; search?: string }
+export interface ClauseGetRequest { id: string }
+export interface ClauseDeleteRequest { id: string }
+
+export type ClauseListResponse = IpcResponse<ClauseRecord[]>
+export type ClauseGetResponse = IpcResponse<ClauseRecord>
+export type ClauseCreateResponse = IpcResponse<ClauseRecord>
+export type ClauseDeleteResponse = IpcResponse<{ id: string }>

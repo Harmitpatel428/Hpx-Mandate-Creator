@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Trash2 } from 'lucide-react'
+import { GripVertical, Trash2, Bookmark } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useUiStore } from '@/stores/uiStore'
@@ -14,9 +14,10 @@ interface BlockWrapperProps {
   sectionId: string
   children: React.ReactNode
   isLocked?: boolean
+  onSaveAsClause?: (block: Block) => void
 }
 
-export function BlockWrapper({ block, sectionId, children, isLocked }: BlockWrapperProps) {
+export function BlockWrapper({ block, sectionId, children, isLocked, onSaveAsClause }: BlockWrapperProps) {
   const { activeBlockId, setActiveBlockId } = useUiStore()
   const { removeBlock } = useProjectStore()
   const [hovered, setHovered] = useState(false)
@@ -68,9 +69,23 @@ export function BlockWrapper({ block, sectionId, children, isLocked }: BlockWrap
         </div>
       )}
 
-      {/* Delete action */}
+      {/* Actions */}
       {!isLocked && (hovered || isActive) && (
         <div className="absolute -right-8 top-1 flex flex-col gap-0.5">
+          {onSaveAsClause && block.type !== 'page-break' && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="h-5 w-5 text-muted-foreground/60 hover:text-primary"
+              title="Save as clause"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSaveAsClause(block)
+              }}
+            >
+              <Bookmark className="h-3 w-3" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon-sm"

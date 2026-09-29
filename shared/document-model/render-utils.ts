@@ -43,6 +43,29 @@ export function formatVariableValue(value: unknown, variable?: Variable): string
 }
 
 /**
+ * Rewrite {{oldKey}} placeholders to {{newKey}} according to a remap.
+ * Keys not present in the map are left unchanged. Whitespace inside the
+ * braces is normalised away.
+ */
+export function rewritePlaceholderKeys(text: string, keyRemap: Record<string, string>): string {
+  if (!text) return ''
+  return text.replace(PLACEHOLDER_RE, (match, key: string) => {
+    const next = keyRemap[key]
+    return next ? `{{${next}}}` : match
+  })
+}
+
+/** Extract the set of variable keys referenced by {{...}} in a string. */
+export function extractPlaceholderKeys(text: string): string[] {
+  if (!text) return []
+  const out = new Set<string>()
+  let m: RegExpExecArray | null
+  const re = new RegExp(PLACEHOLDER_RE.source, 'g')
+  while ((m = re.exec(text)) !== null) out.add(m[1])
+  return [...out]
+}
+
+/**
  * Replace all {{key}} placeholders in a string with their resolved,
  * type-formatted values. Unknown placeholders are left intact so the
  * validation engine can flag them.

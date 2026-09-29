@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type ActivePanel = 'properties' | 'variables' | 'logic' | 'validation' | 'versions' | 'settings'
+type ActivePanel = 'properties' | 'variables' | 'logic' | 'validation' | 'clauses' | 'versions' | 'settings'
 
 interface UiStore {
   searchQuery: string

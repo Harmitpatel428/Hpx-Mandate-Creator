@@ -15,6 +15,17 @@ export const IPC = {
   EXPORT_DOCX: 'export:docx',
   EXPORT_PDF: 'export:pdf',
 
+  TEMPLATE_LIST: 'template:list',
+  TEMPLATE_GET: 'template:get',
+  TEMPLATE_CREATE: 'template:create',
+  TEMPLATE_DELETE: 'template:delete',
+  TEMPLATE_INSTANTIATE: 'template:instantiate',
+
+  CLAUSE_LIST: 'clause:list',
+  CLAUSE_GET: 'clause:get',
+  CLAUSE_CREATE: 'clause:create',
+  CLAUSE_DELETE: 'clause:delete',
+
   APP_GET_VERSION: 'app:get-version',
   DIALOG_SHOW_SAVE: 'dialog:show-save',
 } as const

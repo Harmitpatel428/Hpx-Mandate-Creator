@@ -4,6 +4,8 @@ import { createMainWindow } from './windows'
 import { initDatabase } from './services/database.service'
 import { ProjectService } from './services/project.service'
 import { SettingsService } from './services/settings.service'
+import { LibraryService } from './services/library.service'
+import { seedIfFirstRun } from './services/seed.service'
 import { registerAllHandlers } from './ipc/handlers'
 
 function menuSend(win: BaseWindow | undefined, channel: string): void {
@@ -126,7 +128,16 @@ app.whenReady().then(() => {
 
   const projectService = new ProjectService(repo)
   const settingsService = new SettingsService(repo)
-  registerAllHandlers(projectService, settingsService)
+  const libraryService = new LibraryService(repo)
+
+  // Seed sample content on first launch (before handlers serve any list).
+  try {
+    seedIfFirstRun(repo)
+  } catch (e) {
+    console.warn('[Seed] Failed to seed sample data:', e)
+  }
+
+  registerAllHandlers(projectService, settingsService, libraryService)
 
   buildMenu()
   createMainWindow()

@@ -4,6 +4,7 @@ import {
   Variable,
   GitBranch,
   CheckSquare,
+  Library,
   Clock,
   Settings,
   GripVertical,
@@ -19,18 +20,20 @@ import { useProjectStore } from '@/stores/projectStore'
 import { VariablesPanel } from './variables/VariablesPanel'
 import { LogicPanel } from './logic/LogicPanel'
 import { ValidationPanel } from './validation/ValidationPanel'
+import { ClausePanel } from './clauses/ClausePanel'
 import { VersionHistoryPanel } from './VersionHistoryPanel'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-type Panel = 'properties' | 'variables' | 'logic' | 'validation' | 'versions' | 'settings'
+type Panel = 'properties' | 'variables' | 'logic' | 'validation' | 'clauses' | 'versions' | 'settings'
 
 const NAV_ITEMS: { id: Panel; icon: React.ElementType; label: string }[] = [
   { id: 'properties', icon: FileText, label: 'Document' },
   { id: 'variables', icon: Variable, label: 'Variables' },
   { id: 'logic', icon: GitBranch, label: 'Logic' },
   { id: 'validation', icon: CheckSquare, label: 'Validation' },
+  { id: 'clauses', icon: Library, label: 'Clauses' },
   { id: 'versions', icon: Clock, label: 'Versions' },
   { id: 'settings', icon: Settings, label: 'Settings' },
 ]
@@ -194,6 +197,9 @@ export function EditorLeftSidebar() {
           {/* Validation panel */}
           {activePanel === 'validation' && <ValidationPanel />}
 
+          {/* Clauses panel */}
+          {activePanel === 'clauses' && <ClausePanel />}
+
           {/* Versions panel */}
           {activePanel === 'versions' && <VersionHistoryPanel />}
 
@@ -202,6 +208,7 @@ export function EditorLeftSidebar() {
             activePanel !== 'variables' &&
             activePanel !== 'logic' &&
             activePanel !== 'validation' &&
+            activePanel !== 'clauses' &&
             activePanel !== 'versions' && (
               <div className="flex flex-col items-center justify-center gap-2 pt-8 text-center">
                 <p className="text-xs text-muted-foreground">

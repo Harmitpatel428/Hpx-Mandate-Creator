@@ -1,9 +1,10 @@
 import { app } from 'electron'
 import { join } from 'path'
-import { readFileSync, existsSync, mkdirSync } from 'fs'
+import { mkdirSync } from 'fs'
 import type { IProjectRepository } from '../db/repository'
 import { SqliteRepository } from '../db/sqlite.repository'
 import { JsonRepository } from '../db/json.repository'
+import { MIGRATIONS } from '../db/migrations.sql'
 
 export type StorageEngine = 'sqlite' | 'json'
 
@@ -57,16 +58,13 @@ function runMigrations(db: import('better-sqlite3').Database): void {
     applied_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`)
 
-  const applied = (db.prepare('SELECT version FROM schema_migrations').pluck().all() as number[])
+  const applied = db.prepare('SELECT version FROM schema_migrations').pluck().all() as number[]
 
-  const migrationFiles = [{ version: 1, path: join(__dirname, '../db/migrations/001_initial.sql') }]
-
-  for (const m of migrationFiles) {
+  // DDL is embedded (not read from disk) so migrations run correctly in the
+  // packaged app, where the .sql source files are not copied into out/.
+  for (const m of MIGRATIONS) {
     if (!applied.includes(m.version)) {
-      if (existsSync(m.path)) {
-        const sql = readFileSync(m.path, 'utf-8')
-        db.exec(sql)
-      }
+      db.exec(m.sql)
       db.prepare('INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)').run(m.version)
     }
   }

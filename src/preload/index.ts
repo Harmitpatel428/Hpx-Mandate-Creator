@@ -28,6 +28,23 @@ import type {
   ExportRequest,
   ExportDocxResponse,
   ExportPdfResponse,
+  TemplateCreateRequest,
+  TemplateGetRequest,
+  TemplateDeleteRequest,
+  TemplateInstantiateRequest,
+  TemplateListResponse,
+  TemplateGetResponse,
+  TemplateCreateResponse,
+  TemplateDeleteResponse,
+  TemplateInstantiateResponse,
+  ClauseCreateRequest,
+  ClauseListRequest,
+  ClauseGetRequest,
+  ClauseDeleteRequest,
+  ClauseListResponse,
+  ClauseGetResponse,
+  ClauseCreateResponse,
+  ClauseDeleteResponse,
 } from 'shared/ipc/types'
 
 const electronAPI = {
@@ -73,6 +90,29 @@ const electronAPI = {
       ipcRenderer.invoke(IPC.EXPORT_DOCX, req),
     pdf: (req: ExportRequest): Promise<ExportPdfResponse> =>
       ipcRenderer.invoke(IPC.EXPORT_PDF, req),
+  },
+
+  templates: {
+    list: (): Promise<TemplateListResponse> => ipcRenderer.invoke(IPC.TEMPLATE_LIST),
+    get: (req: TemplateGetRequest): Promise<TemplateGetResponse> =>
+      ipcRenderer.invoke(IPC.TEMPLATE_GET, req),
+    create: (req: TemplateCreateRequest): Promise<TemplateCreateResponse> =>
+      ipcRenderer.invoke(IPC.TEMPLATE_CREATE, req),
+    delete: (req: TemplateDeleteRequest): Promise<TemplateDeleteResponse> =>
+      ipcRenderer.invoke(IPC.TEMPLATE_DELETE, req),
+    instantiate: (req: TemplateInstantiateRequest): Promise<TemplateInstantiateResponse> =>
+      ipcRenderer.invoke(IPC.TEMPLATE_INSTANTIATE, req),
+  },
+
+  clauses: {
+    list: (req: ClauseListRequest = {}): Promise<ClauseListResponse> =>
+      ipcRenderer.invoke(IPC.CLAUSE_LIST, req),
+    get: (req: ClauseGetRequest): Promise<ClauseGetResponse> =>
+      ipcRenderer.invoke(IPC.CLAUSE_GET, req),
+    create: (req: ClauseCreateRequest): Promise<ClauseCreateResponse> =>
+      ipcRenderer.invoke(IPC.CLAUSE_CREATE, req),
+    delete: (req: ClauseDeleteRequest): Promise<ClauseDeleteResponse> =>
+      ipcRenderer.invoke(IPC.CLAUSE_DELETE, req),
   },
 }
 

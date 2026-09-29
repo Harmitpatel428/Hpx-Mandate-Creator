@@ -1,4 +1,8 @@
 import type { MandateDocument, DocumentStatus } from 'shared/document-model/types'
+import type { TemplateRecord, ClauseRecord } from 'shared/document-model/library'
+
+export type TemplateRow = TemplateRecord
+export type ClauseRow = ClauseRecord
 
 export interface ProjectRow {
   id: string
@@ -62,6 +66,18 @@ export interface IProjectRepository {
   listVersions(projectId: string): ProjectVersionRow[]
   getVersion(versionId: string): ProjectVersionRow | null
   getNextVersionNum(projectId: string): number
+
+  // Templates
+  createTemplate(row: TemplateRow): TemplateRow
+  listTemplates(): TemplateRow[]
+  getTemplate(id: string): TemplateRow | null
+  deleteTemplate(id: string): void
+
+  // Clauses
+  createClause(row: ClauseRow): ClauseRow
+  listClauses(opts?: { category?: string; search?: string }): ClauseRow[]
+  getClause(id: string): ClauseRow | null
+  deleteClause(id: string): void
 
   // Settings
   getSetting(key: string): string | null

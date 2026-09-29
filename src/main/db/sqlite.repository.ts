@@ -7,6 +7,7 @@ import type {
   UpdateProjectData,
   CreateVersionData,
 } from './repository'
+import type { TemplateRow, ClauseRow } from './repository'
 import type { DocumentStatus } from 'shared/document-model/types'
 
 interface RawProjectRow {
@@ -84,7 +85,7 @@ export class SqliteRepository implements IProjectRepository {
   }
 
   listProjects(opts?: { includeArchived?: boolean; search?: string }): ProjectRow[] {
-    const conditions: string[] = ['deleted_at IS NULL']
+    const conditions: string[] = []
     const params: unknown[] = []
 
     if (!opts?.includeArchived) {
@@ -162,6 +163,101 @@ export class SqliteRepository implements IProjectRepository {
       .prepare('SELECT COALESCE(MAX(version_num), 0) + 1 as next FROM project_versions WHERE project_id = ?')
       .get(projectId) as { next: number }
     return result.next
+  }
+
+  // ---- Templates ----
+
+  createTemplate(row: TemplateRow): TemplateRow {
+    this.db
+      .prepare(
+        `INSERT INTO templates (id, name, description, category, is_sample, created_at, updated_at, content)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(row.id, row.name, row.description, row.category, row.isSample ? 1 : 0, row.createdAt, row.updatedAt, JSON.stringify(row.content))
+    return this.getTemplate(row.id)!
+  }
+
+  listTemplates(): TemplateRow[] {
+    const rows = this.db.prepare('SELECT * FROM templates ORDER BY updated_at DESC').all() as Array<Record<string, unknown>>
+    return rows.map((r) => this.parseTemplate(r))
+  }
+
+  getTemplate(id: string): TemplateRow | null {
+    const row = this.db.prepare('SELECT * FROM templates WHERE id = ?').get(id) as Record<string, unknown> | undefined
+    return row ? this.parseTemplate(row) : null
+  }
+
+  deleteTemplate(id: string): void {
+    this.db.prepare('DELETE FROM templates WHERE id = ?').run(id)
+  }
+
+  private parseTemplate(r: Record<string, unknown>): TemplateRow {
+    return {
+      id: r.id as string,
+      name: r.name as string,
+      description: (r.description as string) ?? '',
+      category: (r.category as string) ?? 'General',
+      isSample: !!r.is_sample,
+      createdAt: r.created_at as string,
+      updatedAt: r.updated_at as string,
+      content: JSON.parse(r.content as string),
+    }
+  }
+
+  // ---- Clauses ----
+
+  createClause(row: ClauseRow): ClauseRow {
+    this.db
+      .prepare(
+        `INSERT INTO clauses (id, name, description, category, tags, is_sample, kind, section, blocks, variables, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        row.id, row.name, row.description, row.category, JSON.stringify(row.tags ?? []),
+        row.isSample ? 1 : 0, row.kind, row.section ? JSON.stringify(row.section) : null,
+        JSON.stringify(row.blocks ?? []), JSON.stringify(row.variables ?? []), row.createdAt, row.updatedAt,
+      )
+    return this.getClause(row.id)!
+  }
+
+  listClauses(opts?: { category?: string; search?: string }): ClauseRow[] {
+    const conditions: string[] = []
+    const params: unknown[] = []
+    if (opts?.category) { conditions.push('category = ?'); params.push(opts.category) }
+    if (opts?.search) {
+      conditions.push('(name LIKE ? OR description LIKE ? OR tags LIKE ?)')
+      const term = `%${opts.search}%`
+      params.push(term, term, term)
+    }
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+    const rows = this.db.prepare(`SELECT * FROM clauses ${where} ORDER BY updated_at DESC`).all(...params) as Array<Record<string, unknown>>
+    return rows.map((r) => this.parseClause(r))
+  }
+
+  getClause(id: string): ClauseRow | null {
+    const row = this.db.prepare('SELECT * FROM clauses WHERE id = ?').get(id) as Record<string, unknown> | undefined
+    return row ? this.parseClause(row) : null
+  }
+
+  deleteClause(id: string): void {
+    this.db.prepare('DELETE FROM clauses WHERE id = ?').run(id)
+  }
+
+  private parseClause(r: Record<string, unknown>): ClauseRow {
+    return {
+      id: r.id as string,
+      name: r.name as string,
+      description: (r.description as string) ?? '',
+      category: (r.category as string) ?? 'General',
+      tags: JSON.parse((r.tags as string) ?? '[]'),
+      isSample: !!r.is_sample,
+      kind: (r.kind as ClauseRow['kind']) ?? 'blocks',
+      section: r.section ? JSON.parse(r.section as string) : null,
+      blocks: JSON.parse((r.blocks as string) ?? '[]'),
+      variables: JSON.parse((r.variables as string) ?? '[]'),
+      createdAt: r.created_at as string,
+      updatedAt: r.updated_at as string,
+    }
   }
 
   getSetting(key: string): string | null {

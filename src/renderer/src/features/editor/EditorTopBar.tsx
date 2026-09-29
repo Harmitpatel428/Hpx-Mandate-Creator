@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Download, Eye } from 'lucide-react'
+import { ArrowLeft, Download, Eye, LayoutTemplate } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AutosaveIndicator } from './AutosaveIndicator'
 import { ExportModal } from './ExportModal'
+import { SaveTemplateModal } from '../library/SaveTemplateModal'
 import { useProjectStore } from '@/stores/projectStore'
 import { useProject } from '@/hooks/useProject'
 
@@ -20,6 +21,7 @@ export function EditorTopBar() {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
   const [exportOpen, setExportOpen] = useState(false)
+  const [templateOpen, setTemplateOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   async function handlePreview() {
@@ -113,6 +115,14 @@ export function EditorTopBar() {
       <div className="flex items-center gap-1 titlebar-no-drag">
         <Tooltip>
           <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon-sm" onClick={() => setTemplateOpen(true)} disabled={!currentProject}>
+              <LayoutTemplate className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Save as template</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" onClick={handlePreview} disabled={!currentProject}>
               <Eye className="h-4 w-4" />
             </Button>
@@ -130,6 +140,7 @@ export function EditorTopBar() {
       </div>
 
       <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
+      <SaveTemplateModal open={templateOpen} onClose={() => setTemplateOpen(false)} />
     </div>
   )
 }

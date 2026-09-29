@@ -9,19 +9,26 @@ import type {
   CreateVersionData,
 } from './repository'
 import type { DocumentStatus } from 'shared/document-model/types'
+import type { TemplateRow, ClauseRow } from './repository'
 
 
 export class JsonRepository implements IProjectRepository {
   private dir: string
   private projectsDir: string
   private versionsDir: string
+  private templatesDir: string
+  private clausesDir: string
 
   constructor(storageDir: string) {
     this.dir = storageDir
     this.projectsDir = join(storageDir, 'projects')
     this.versionsDir = join(storageDir, 'versions')
+    this.templatesDir = join(storageDir, 'templates')
+    this.clausesDir = join(storageDir, 'clauses')
     mkdirSync(this.projectsDir, { recursive: true })
     mkdirSync(this.versionsDir, { recursive: true })
+    mkdirSync(this.templatesDir, { recursive: true })
+    mkdirSync(this.clausesDir, { recursive: true })
   }
 
   private atomicWrite(path: string, data: unknown): void {
@@ -153,6 +160,65 @@ export class JsonRepository implements IProjectRepository {
     const versions = this.listVersions(projectId)
     if (versions.length === 0) return 1
     return Math.max(...versions.map((v) => v.versionNum)) + 1
+  }
+
+  // ---- Templates ----
+
+  createTemplate(row: TemplateRow): TemplateRow {
+    this.atomicWrite(join(this.templatesDir, `${row.id}.json`), row)
+    return row
+  }
+
+  listTemplates(): TemplateRow[] {
+    const files = readdirSync(this.templatesDir).filter((f) => f.endsWith('.json'))
+    const rows: TemplateRow[] = []
+    for (const file of files) {
+      const row = this.readJSON<TemplateRow>(join(this.templatesDir, file))
+      if (row) rows.push(row)
+    }
+    return rows.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  }
+
+  getTemplate(id: string): TemplateRow | null {
+    return this.readJSON<TemplateRow>(join(this.templatesDir, `${id}.json`))
+  }
+
+  deleteTemplate(id: string): void {
+    const path = join(this.templatesDir, `${id}.json`)
+    if (existsSync(path)) unlinkSync(path)
+  }
+
+  // ---- Clauses ----
+
+  createClause(row: ClauseRow): ClauseRow {
+    this.atomicWrite(join(this.clausesDir, `${row.id}.json`), row)
+    return row
+  }
+
+  listClauses(opts?: { category?: string; search?: string }): ClauseRow[] {
+    const files = readdirSync(this.clausesDir).filter((f) => f.endsWith('.json'))
+    const rows: ClauseRow[] = []
+    for (const file of files) {
+      const row = this.readJSON<ClauseRow>(join(this.clausesDir, file))
+      if (!row) continue
+      if (opts?.category && row.category !== opts.category) continue
+      if (opts?.search) {
+        const term = opts.search.toLowerCase()
+        const hay = [row.name, row.description, row.category, ...(row.tags ?? [])].join(' ').toLowerCase()
+        if (!hay.includes(term)) continue
+      }
+      rows.push(row)
+    }
+    return rows.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  }
+
+  getClause(id: string): ClauseRow | null {
+    return this.readJSON<ClauseRow>(join(this.clausesDir, `${id}.json`))
+  }
+
+  deleteClause(id: string): void {
+    const path = join(this.clausesDir, `${id}.json`)
+    if (existsSync(path)) unlinkSync(path)
   }
 
   getSetting(key: string): string | null {

@@ -8,6 +8,8 @@ import { useUiStore } from '@/stores/uiStore'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { BlockWrapper } from './blocks/BlockWrapper'
+import { SaveClauseModal, type ClausePayload } from '../library/SaveClauseModal'
+import { Bookmark } from 'lucide-react'
 import { HeadingBlock } from './blocks/HeadingBlock'
 import { ParagraphBlock } from './blocks/ParagraphBlock'
 import { PageBreakBlock } from './blocks/PageBreakBlock'
@@ -54,7 +56,15 @@ function BlockRenderer({ block, sectionId }: { block: Block; sectionId: string }
   }
 }
 
-function SectionView({ section, sectionIndex }: { section: Section; sectionIndex: number }) {
+function SectionView({
+  section,
+  sectionIndex,
+  onSaveAsClause,
+}: {
+  section: Section
+  sectionIndex: number
+  onSaveAsClause: (payload: ClausePayload) => void
+}) {
   const { addBlock, reorderBlocks, updateSection } = useProjectStore()
   const { setActiveSectionId, setActiveBlockId } = useUiStore()
   const [editingTitle, setEditingTitle] = useState(false)
@@ -111,6 +121,16 @@ function SectionView({ section, sectionIndex }: { section: Section; sectionIndex
             {section.title || <span className="text-gray-400 font-normal italic text-sm">Untitled Section</span>}
           </h2>
         )}
+        {section.blocks.length > 0 && (
+          <button
+            className="opacity-0 group-hover/section:opacity-100 shrink-0 flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-gray-400 hover:text-primary hover:bg-gray-100 transition-all"
+            title="Save section as clause"
+            onClick={(e) => { e.stopPropagation(); onSaveAsClause({ kind: 'section', section }) }}
+          >
+            <Bookmark className="h-3 w-3" />
+            Save as clause
+          </button>
+        )}
       </div>
 
       {/* Blocks */}
@@ -118,7 +138,13 @@ function SectionView({ section, sectionIndex }: { section: Section; sectionIndex
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={section.blocks.map((b) => b.id)} strategy={verticalListSortingStrategy}>
             {section.blocks.map((block) => (
-              <BlockWrapper key={block.id} block={block} sectionId={section.id} isLocked={block.locked}>
+              <BlockWrapper
+                key={block.id}
+                block={block}
+                sectionId={section.id}
+                isLocked={block.locked}
+                onSaveAsClause={(b) => onSaveAsClause({ kind: 'blocks', blocks: [b] })}
+              >
                 <BlockRenderer block={block} sectionId={section.id} />
               </BlockWrapper>
             ))}
@@ -156,6 +182,7 @@ function SectionView({ section, sectionIndex }: { section: Section; sectionIndex
 export function EditorCanvas() {
   const document = useProjectStore((s) => s.document)
   const { addSection } = useProjectStore()
+  const [clausePayload, setClausePayload] = useState<ClausePayload | null>(null)
 
   const sections = document?.sections ?? []
 
@@ -205,7 +232,12 @@ export function EditorCanvas() {
           ) : (
             <div className="space-y-8">
               {sections.map((section, sIdx) => (
-                <SectionView key={section.id} section={section} sectionIndex={sIdx} />
+                <SectionView
+                  key={section.id}
+                  section={section}
+                  sectionIndex={sIdx}
+                  onSaveAsClause={setClausePayload}
+                />
               ))}
             </div>
           )}
@@ -224,6 +256,12 @@ export function EditorCanvas() {
           </Button>
         </div>
       </div>
+
+      <SaveClauseModal
+        open={!!clausePayload}
+        onClose={() => setClausePayload(null)}
+        payload={clausePayload}
+      />
     </ScrollArea>
   )
 }
