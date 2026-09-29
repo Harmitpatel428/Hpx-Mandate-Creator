@@ -18,6 +18,8 @@ import { useUiStore } from '@/stores/uiStore'
 import type { DocumentStatus } from 'shared/document-model/types'
 import { useProjectStore } from '@/stores/projectStore'
 import { VariablesPanel } from './variables/VariablesPanel'
+import { LogicPanel } from './logic/LogicPanel'
+import { ValidationPanel } from './validation/ValidationPanel'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -186,8 +188,14 @@ export function EditorLeftSidebar() {
           {/* Variables panel */}
           {activePanel === 'variables' && <VariablesPanel />}
 
+          {/* Logic panel */}
+          {activePanel === 'logic' && <LogicPanel />}
+
+          {/* Validation panel */}
+          {activePanel === 'validation' && <ValidationPanel />}
+
           {/* Future panels */}
-          {activePanel !== 'properties' && activePanel !== 'variables' && (
+          {activePanel !== 'properties' && activePanel !== 'variables' && activePanel !== 'logic' && activePanel !== 'validation' && (
             <div className="flex flex-col items-center justify-center gap-2 pt-8 text-center">
               <p className="text-xs text-muted-foreground">
                 {NAV_ITEMS.find((n) => n.id === activePanel)?.label} panel

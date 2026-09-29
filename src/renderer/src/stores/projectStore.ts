@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { MandateDocument, Block, Variable, SaveState } from 'shared/document-model/types'
+import type { MandateDocument, Block, Variable, SaveState, LogicRule } from 'shared/document-model/types'
 import type { ProjectRecord } from 'shared/ipc/types'
 import { generateId } from 'shared/utils/id'
 
@@ -37,6 +37,11 @@ interface ProjectStore {
   updateVariable: (id: string, patch: Partial<Omit<Variable, 'id'>>) => void
   removeVariable: (id: string) => void
   setVariableValue: (key: string, value: unknown) => void
+
+  // Rule actions
+  addRule: (rule: LogicRule) => void
+  updateRule: (id: string, patch: Partial<LogicRule>) => void
+  removeRule: (id: string) => void
 
   // Save state
   saveState: SaveState
@@ -225,6 +230,29 @@ export const useProjectStore = create<ProjectStore>()(
       set((state) => {
         if (!state.document) return
         state.document.variableValues[key] = value
+        state.saveState = 'unsaved'
+      }),
+
+    // Rule actions
+    addRule: (rule) =>
+      set((state) => {
+        if (!state.document) return
+        state.document.rules.push(rule as never)
+        state.saveState = 'unsaved'
+      }),
+
+    updateRule: (id, patch) =>
+      set((state) => {
+        if (!state.document) return
+        const r = state.document.rules.find((r) => r.id === id)
+        if (r) Object.assign(r, patch)
+        state.saveState = 'unsaved'
+      }),
+
+    removeRule: (id) =>
+      set((state) => {
+        if (!state.document) return
+        state.document.rules = state.document.rules.filter((r) => r.id !== id)
         state.saveState = 'unsaved'
       }),
 
