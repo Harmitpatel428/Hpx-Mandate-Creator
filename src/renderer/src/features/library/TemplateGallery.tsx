@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LayoutTemplate, Trash2, Eye, Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CardGridSkeleton } from '@/components/ui/skeleton'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { TemplatePreviewModal } from './TemplatePreviewModal'
 import { useProjectStore } from '@/stores/projectStore'
@@ -53,11 +54,7 @@ export function TemplateGallery() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full text-muted-foreground gap-2">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading templates…
-      </div>
-    )
+    return <CardGridSkeleton />
   }
 
   if (templates.length === 0) {

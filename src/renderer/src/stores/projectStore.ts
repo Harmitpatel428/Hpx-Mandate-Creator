@@ -19,6 +19,8 @@ interface ProjectStore {
   document: MandateDocument | null
   setDocument: (doc: MandateDocument | null) => void
   patchDocument: (patch: Partial<MandateDocument>) => void
+  // Replace the whole document from an undo/redo history step (marks unsaved).
+  applyHistoryDocument: (doc: MandateDocument) => void
 
   // Section actions
   addSection: (title?: string) => void
@@ -119,6 +121,11 @@ export const useProjectStore = create<ProjectStore>()(
       set((state) => {
         if (!state.document) return
         Object.assign(state.document, patch)
+        state.saveState = 'unsaved'
+      }),
+    applyHistoryDocument: (doc) =>
+      set((state) => {
+        state.document = doc
         state.saveState = 'unsaved'
       }),
 

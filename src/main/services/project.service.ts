@@ -7,9 +7,13 @@ import type {
 } from 'shared/ipc/types'
 import { createDefaultDocument } from 'shared/document-model/defaults'
 import { generateId } from 'shared/utils/id'
+import type { BackupService } from './backup.service'
 
 export class ProjectService {
-  constructor(private repo: IProjectRepository) {}
+  constructor(
+    private repo: IProjectRepository,
+    private backup?: BackupService,
+  ) {}
 
   createProject(req: ProjectCreateRequest): ProjectRow {
     const now = new Date().toISOString()
@@ -61,7 +65,24 @@ export class ProjectService {
   }
 
   deleteProject(id: string): void {
+    const existing = this.repo.getProject(id)
+    if (existing) this.backup?.backupProject(existing, 'pre-delete')
     this.repo.deleteProject(id)
+  }
+
+  /** Restore a project's content from an earlier version, backing up first. */
+  restoreVersion(projectId: string, versionId: string): ProjectRow | null {
+    const current = this.repo.getProject(projectId)
+    if (!current) return null
+    const version = this.repo.getVersion(versionId)
+    if (!version) return null
+
+    this.backup?.backupProject(current, 'pre-restore')
+    return this.repo.updateProject({
+      id: projectId,
+      content: version.content,
+      updatedAt: new Date().toISOString(),
+    })
   }
 
   saveVersion(req: ProjectSaveVersionRequest): ProjectVersionRow {

@@ -8,6 +8,7 @@ export const IPC = {
   PROJECT_SAVE_VERSION: 'project:save-version',
   PROJECT_GET_VERSIONS: 'project:get-versions',
   PROJECT_GET_VERSION: 'project:get-version',
+  PROJECT_RESTORE_VERSION: 'project:restore-version',
 
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',

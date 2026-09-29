@@ -78,6 +78,11 @@ export interface ProjectGetVersionRequest {
   versionId: string
 }
 
+export interface ProjectRestoreVersionRequest {
+  projectId: string
+  versionId: string
+}
+
 export interface SettingsGetRequest {
   key: string
 }
@@ -131,6 +136,7 @@ export type ProjectDeleteResponse = IpcResponse<{ id: string }>
 export type ProjectSaveVersionResponse = IpcResponse<ProjectVersionRecord>
 export type ProjectGetVersionsResponse = IpcResponse<ProjectVersionRecord[]>
 export type ProjectGetVersionResponse = IpcResponse<ProjectVersionRecord>
+export type ProjectRestoreVersionResponse = IpcResponse<ProjectRecord>
 export type SettingsGetResponse = IpcResponse<unknown>
 export type SettingsSetResponse = IpcResponse<void>
 export type DialogShowSaveResponse = IpcResponse<string | null>

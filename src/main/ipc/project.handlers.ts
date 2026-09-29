@@ -36,6 +36,10 @@ const ProjectSaveVersionSchema = z.object({
 
 const ProjectGetVersionsSchema = z.object({ projectId: z.string().min(1).max(64) })
 const ProjectGetVersionSchema = z.object({ versionId: z.string().min(1).max(64) })
+const ProjectRestoreVersionSchema = z.object({
+  projectId: z.string().min(1).max(64),
+  versionId: z.string().min(1).max(64),
+})
 
 function ok<T>(data: T): IpcResponse<T> {
   return { success: true, data }
@@ -132,6 +136,17 @@ export function registerProjectHandlers(service: ProjectService): void {
       const version = service.getVersion(versionId)
       if (!version) return err('Version not found', 'NOT_FOUND')
       return ok(version)
+    } catch (e) {
+      return err(String(e))
+    }
+  })
+
+  ipcMain.handle(IPC.PROJECT_RESTORE_VERSION, async (_e, raw) => {
+    try {
+      const { projectId, versionId } = ProjectRestoreVersionSchema.parse(raw)
+      const project = service.restoreVersion(projectId, versionId)
+      if (!project) return err('Project or version not found', 'NOT_FOUND')
+      return ok(project)
     } catch (e) {
       return err(String(e))
     }

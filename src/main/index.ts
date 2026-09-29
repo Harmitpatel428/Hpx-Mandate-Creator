@@ -5,6 +5,7 @@ import { initDatabase } from './services/database.service'
 import { ProjectService } from './services/project.service'
 import { SettingsService } from './services/settings.service'
 import { LibraryService } from './services/library.service'
+import { BackupService } from './services/backup.service'
 import { seedIfFirstRun } from './services/seed.service'
 import { registerAllHandlers } from './ipc/handlers'
 
@@ -126,7 +127,8 @@ app.whenReady().then(() => {
   const { repo, engine } = initDatabase()
   console.warn(`[App] Storage engine: ${engine}`)
 
-  const projectService = new ProjectService(repo)
+  const backupService = new BackupService(engine)
+  const projectService = new ProjectService(repo, backupService)
   const settingsService = new SettingsService(repo)
   const libraryService = new LibraryService(repo)
 

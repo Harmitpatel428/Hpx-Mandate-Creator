@@ -10,7 +10,7 @@ import { TemplateGallery } from '../library/TemplateGallery'
 import { useUiStore } from '@/stores/uiStore'
 import { useProjectStore } from '@/stores/projectStore'
 import { useProject } from '@/hooks/useProject'
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
+import { CardGridSkeleton } from '@/components/ui/skeleton'
 
 type Tab = 'mandates' | 'templates'
 
@@ -70,9 +70,7 @@ export function Dashboard() {
         {tab === 'templates' ? (
           <TemplateGallery />
         ) : isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <LoadingSpinner />
-          </div>
+          <CardGridSkeleton />
         ) : (
           <ProjectList
             projects={active}

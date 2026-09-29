@@ -59,15 +59,11 @@ export function VersionHistoryPanel() {
     if (!projectId) return
     setBusyId(versionId)
     try {
-      const verRes = await window.electronAPI.projects.getVersion({ versionId })
-      if (!verRes.success) return
-      const content = verRes.data.content
-
-      // Persist the restored content, then load it into the editor.
-      const upd = await window.electronAPI.projects.update({ id: projectId, content })
-      if (upd.success) {
-        setCurrentProject(upd.data)
-        setDocument(content)
+      // Main process backs up the current state before restoring.
+      const res = await window.electronAPI.projects.restoreVersion({ projectId, versionId })
+      if (res.success) {
+        setCurrentProject(res.data)
+        setDocument(res.data.content)
       }
       setConfirmId(null)
       await load()

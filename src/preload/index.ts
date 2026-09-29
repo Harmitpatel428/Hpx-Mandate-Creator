@@ -19,6 +19,8 @@ import type {
   ProjectGetVersionsResponse,
   ProjectGetVersionRequest,
   ProjectGetVersionResponse,
+  ProjectRestoreVersionRequest,
+  ProjectRestoreVersionResponse,
   SettingsGetRequest,
   SettingsGetResponse,
   SettingsSetRequest,
@@ -67,6 +69,8 @@ const electronAPI = {
       ipcRenderer.invoke(IPC.PROJECT_GET_VERSIONS, req),
     getVersion: (req: ProjectGetVersionRequest): Promise<ProjectGetVersionResponse> =>
       ipcRenderer.invoke(IPC.PROJECT_GET_VERSION, req),
+    restoreVersion: (req: ProjectRestoreVersionRequest): Promise<ProjectRestoreVersionResponse> =>
+      ipcRenderer.invoke(IPC.PROJECT_RESTORE_VERSION, req),
   },
 
   settings: {
